@@ -2,6 +2,18 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
-const sql = neon(process.env.DATABASE_URL!);
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
 
-export const db = drizzle({ client: sql, schema });
+const sql = neon(process.env.DATABASE_URL);
+
+const createDb = () => drizzle({ client: sql, schema });
+
+const globalForDb = globalThis as unknown as { db: ReturnType<typeof createDb> };
+
+export const db = globalForDb.db ?? createDb();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.db = db;
+}
