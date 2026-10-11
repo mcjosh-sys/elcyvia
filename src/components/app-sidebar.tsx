@@ -112,9 +112,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
                         {initials}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col items-start text-left">
-                      <span className="text-sm font-medium">{user.name}</span>
-                      <span className="text-xs text-muted-foreground">
+                    <div className="flex min-w-0 flex-col items-start text-left">
+                      <span className="truncate text-sm font-medium">
+                        {user.name}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">
                         {user.email}
                       </span>
                     </div>
