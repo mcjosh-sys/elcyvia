@@ -128,7 +128,7 @@ export default function Home() {
               <ScrollReveal className="md:col-span-5" delay={100}>
                 <div className="rounded-2xl bg-muted/50 p-1.5 ring-1 ring-border">
                   <div className="flex flex-col gap-6 rounded-[calc(1rem-6px)] bg-card p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)] md:flex-row md:items-center md:gap-12">
-                    <div className="inline-flex rounded-xl bg-primary/10 p-3">
+                    <div className="inline-flex self-start rounded-xl bg-primary/10 p-3">
                       <Briefcase
                         aria-hidden="true"
                         className="size-6 text-primary"
@@ -211,7 +211,7 @@ function FeatureCard({
   return (
     <div className="h-full rounded-2xl bg-muted/50 p-1.5 ring-1 ring-border transition-colors hover:ring-foreground/15">
       <div className="flex h-full flex-col rounded-[calc(1rem-6px)] bg-card p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
-        <div className="mb-5 inline-flex rounded-xl bg-primary/10 p-3">
+        <div className="mb-5 inline-flex self-start rounded-xl bg-primary/10 p-3">
           {icon}
         </div>
         <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
