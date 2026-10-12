@@ -123,6 +123,32 @@ export const resumeVersions = pgTable(
   (t) => [index("resume_versions_resume_id_idx").on(t.resumeId)]
 );
 
+// Cover letter tables
+
+export const coverLetters = pgTable(
+  "cover_letters",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    resumeId: uuid("resume_id").references(() => resumes.id, {
+      onDelete: "set null",
+    }),
+    jobTitle: text("job_title").notNull(),
+    company: text("company"),
+    jobDescription: text("job_description"),
+    content: text("content").notNull(),
+    deletedAt: timestamp("deleted_at", tz),
+    createdAt: timestamp("created_at", tz).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", tz).defaultNow().notNull(),
+  },
+  (t) => [
+    index("cover_letters_user_id_idx").on(t.userId),
+    index("cover_letters_resume_id_idx").on(t.resumeId),
+  ]
+);
+
 // Interview tables
 
 export const interviewStatusEnum = pgEnum("interview_status", [

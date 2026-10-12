@@ -101,6 +101,27 @@ export function createEmptyResumeContent(): ResumeContent {
   };
 }
 
+export interface ResumeAnalysis {
+  overallScore: number;
+  sections: {
+    name: string;
+    score: number;
+    feedback: string;
+    suggestions: string[];
+  }[];
+  keywords: {
+    found: string[];
+    missing: string[];
+    nice_to_have: string[];
+  };
+  improvements: {
+    priority: "high" | "medium" | "low";
+    section: string;
+    suggestion: string;
+  }[];
+  strengths: string[];
+}
+
 export type ResumeSection = keyof ResumeContent;
 
 export const RESUME_SECTIONS = [

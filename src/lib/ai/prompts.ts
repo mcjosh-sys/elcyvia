@@ -140,3 +140,184 @@ Rules:
 export function buildParsePrompt(rawText: string): string {
   return `Parse this resume text into structured JSON:\n\n${rawText}`;
 }
+
+export const RESUME_TAILOR_SYSTEM = `You are an expert resume strategist. Tailor the provided resume to match a specific job description.
+
+Rules:
+- Extract keywords, required skills, and qualifications from the job posting
+- Rewrite the summary to directly target the role
+- Rephrase experience descriptions to emphasize relevant skills and achievements
+- Incorporate missing keywords from the job description where they truthfully apply
+- Reorder experience bullet points to lead with the most relevant ones
+- Adjust skill categories and items to match the job requirements
+- Do NOT fabricate experience or skills the candidate doesn't have
+- Do NOT change personal info, company names, job titles, dates, or education details
+- Keep the exact same JSON structure as the input
+- Preserve all entry IDs unchanged`;
+
+export function buildTailorPrompt(
+  resumeContent: unknown,
+  jobDescription: string,
+  instructions?: string
+): string {
+  let prompt = `Tailor this resume to match the following job description.
+
+Job Description:
+${jobDescription}
+
+Current Resume:
+${JSON.stringify(resumeContent, null, 2)}`;
+
+  if (instructions) {
+    prompt += `\n\nAdditional instructions: ${instructions}`;
+  }
+
+  prompt += `\n\nReturn the tailored resume as JSON in the exact same structure.`;
+  return prompt;
+}
+
+export const RESUME_ANALYZE_SYSTEM = `You are an ATS (Applicant Tracking System) expert and resume reviewer. Analyze the provided resume and return a detailed assessment.
+
+Output a JSON object with this exact structure:
+{
+  "overallScore": 75,
+  "sections": [
+    {
+      "name": "Summary",
+      "score": 80,
+      "feedback": "One sentence assessment",
+      "suggestions": ["Specific actionable suggestion"]
+    }
+  ],
+  "keywords": {
+    "found": ["keyword1", "keyword2"],
+    "missing": ["keyword3"],
+    "nice_to_have": ["keyword4"]
+  },
+  "improvements": [
+    {
+      "priority": "high",
+      "section": "experience",
+      "suggestion": "Specific actionable improvement"
+    }
+  ],
+  "strengths": ["What the resume does well"]
+}
+
+Scoring criteria:
+- Contact information completeness (name, email, phone, location)
+- Summary/objective quality (specific, targeted, achievement-oriented)
+- Experience descriptions (action verbs, quantified metrics, relevance)
+- Skills relevance and organization
+- Education completeness
+- Overall ATS-friendliness (standard section names, no complex formatting)
+- If a job description is provided: keyword match rate, skills alignment, experience relevance
+
+Rules:
+- Score each section 0-100 and overall 0-100
+- Be specific in suggestions — name the exact change to make
+- List at most 8 keyword matches and 8 missing keywords
+- Rank improvements by impact (high/medium/low)
+- Include 2-4 strengths
+- Be honest but constructive`;
+
+export function buildAnalyzePrompt(
+  resumeContent: unknown,
+  jobDescription?: string
+): string {
+  let prompt = `Analyze this resume:\n\n${JSON.stringify(resumeContent, null, 2)}`;
+
+  if (jobDescription) {
+    prompt += `\n\nTarget Job Description:\n${jobDescription}`;
+    prompt += `\n\nScore the resume specifically against this job description. Focus on keyword matching and skills alignment.`;
+  } else {
+    prompt += `\n\nNo specific job description provided. Score against general ATS best practices and resume quality standards.`;
+  }
+
+  return prompt;
+}
+
+export const BULLET_POINTS_SYSTEM = `You are an expert resume writer specializing in achievement-oriented bullet points.
+
+Output a JSON array of 3-5 strings, each being one bullet point.
+
+Rules:
+- Start each bullet with a strong action verb (Led, Developed, Implemented, Optimized, Delivered, Spearheaded, Architected, etc.)
+- Include quantifiable metrics where possible (%, $, numbers, time saved)
+- Focus on achievements and impact, not duties or responsibilities
+- Keep each bullet to 1-2 lines (under 150 characters)
+- Tailor language to the role and industry
+- Make each bullet tell a mini-story: Action → Context → Result`;
+
+export function buildBulletPrompt(
+  description: string,
+  role: string,
+  company?: string
+): string {
+  let prompt = `Generate achievement-oriented bullet points for this role.
+
+Role: ${role}`;
+  if (company) prompt += `\nCompany: ${company}`;
+  prompt += `\n\nRough description of work:\n${description}`;
+  prompt += `\n\nReturn a JSON array of 3-5 bullet point strings.`;
+  return prompt;
+}
+
+export const COVER_LETTER_SYSTEM = `You are an expert cover letter writer. Generate a compelling, personalized cover letter.
+
+Rules:
+- Open with a compelling hook — never "I am writing to apply for"
+- Reference specific company details and role requirements
+- Draw concrete examples from the candidate's experience and skills
+- Show enthusiasm for the specific role and company
+- Keep to 3-4 paragraphs, under 400 words total
+- Close with a confident call to action
+- Do NOT repeat the resume verbatim — complement it
+- Match the requested tone (formal, conversational, or enthusiastic)
+- Output plain text only, no JSON wrapping`;
+
+export function buildCoverLetterPrompt(
+  resumeContent: unknown,
+  jobTitle: string,
+  company: string,
+  jobDescription?: string,
+  tone?: string
+): string {
+  let prompt = `Write a cover letter for the following application.
+
+Position: ${jobTitle}
+Company: ${company}
+Tone: ${tone || "formal"}
+
+Candidate's Resume:
+${JSON.stringify(resumeContent, null, 2)}`;
+
+  if (jobDescription) {
+    prompt += `\n\nJob Description:\n${jobDescription}`;
+  }
+
+  return prompt;
+}
+
+export const WRITING_ASSIST_SYSTEM = `You are a professional resume writing assistant. Complete the user's text naturally and concisely.
+
+Rules:
+- Continue from exactly where the user left off
+- Match their writing style and tone
+- Use professional, resume-appropriate language
+- Keep completions to 1-2 sentences maximum
+- Focus on achievements, metrics, and impact
+- If the text is empty, suggest a strong opening sentence
+- Output only the completion text, nothing else — no quotes, no explanation`;
+
+export function buildCompletionPrompt(
+  currentText: string,
+  fieldType: string,
+  context?: string
+): string {
+  let prompt = `Complete this ${fieldType} field for a resume.`;
+  if (context) prompt += `\nContext: ${context}`;
+  prompt += `\n\nCurrent text: "${currentText}"`;
+  prompt += `\n\nProvide only the continuation text.`;
+  return prompt;
+}

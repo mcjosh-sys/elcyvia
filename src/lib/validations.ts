@@ -101,6 +101,39 @@ export const uploadResumeSchema = z.object({
   providerId: providerIdSchema,
 });
 
+export const tailorResumeSchema = z.object({
+  jobDescription: z.string().min(10, "Job description is required").max(15000),
+  instructions: z.string().max(1000).optional(),
+  providerId: providerIdSchema,
+});
+
+export const analyzeResumeSchema = z.object({
+  jobDescription: z.string().max(15000).optional(),
+  providerId: providerIdSchema,
+});
+
+export const bulletPointsSchema = z.object({
+  description: z.string().min(1).max(5000),
+  role: z.string().min(1).max(200),
+  company: z.string().max(200).optional(),
+  providerId: providerIdSchema,
+});
+
+export const coverLetterSchema = z.object({
+  jobTitle: z.string().min(1, "Job title is required").max(200),
+  company: z.string().min(1, "Company is required").max(200),
+  jobDescription: z.string().max(15000).optional(),
+  tone: z.enum(["formal", "conversational", "enthusiastic"]).optional(),
+  providerId: providerIdSchema,
+});
+
+export const completionSchema = z.object({
+  currentText: z.string().max(3000),
+  fieldType: z.string().min(1).max(50),
+  context: z.string().max(2000).optional(),
+  providerId: providerIdSchema,
+});
+
 export const createInterviewSchema = z.object({
   jobTitle: z.string().min(1, "Job title is required").max(200),
   company: z.string().max(200).optional(),
