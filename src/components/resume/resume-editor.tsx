@@ -294,32 +294,6 @@ export function ResumeEditor({
         </div>
       </header>
 
-      {/* Mobile top-level tabs */}
-      <div className="md:hidden flex border-b shrink-0">
-        {([
-          { id: "edit" as const, label: "Edit", icon: Pencil },
-          { id: "ai" as const, label: "AI Tools", icon: Sparkles },
-          { id: "preview" as const, label: "Preview", icon: Eye },
-        ]).map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setMobileTab(tab.id)}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition-colors",
-                mobileTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground"
-              )}
-            >
-              <Icon className="size-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Editor body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop section sidebar */}
@@ -513,6 +487,32 @@ export function ResumeEditor({
             />
           </div>
         )}
+      </div>
+
+      {/* Mobile bottom tab bar */}
+      <div className="md:hidden flex border-t bg-background shrink-0">
+        {([
+          { id: "edit" as const, label: "Edit", icon: Pencil },
+          { id: "ai" as const, label: "AI Tools", icon: Sparkles },
+          { id: "preview" as const, label: "Preview", icon: Eye },
+        ]).map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setMobileTab(tab.id)}
+              className={cn(
+                "flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
+                mobileTab === tab.id
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}
+            >
+              <Icon className={cn("size-5", mobileTab === tab.id && "text-primary")} />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
