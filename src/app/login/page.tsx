@@ -1,5 +1,4 @@
 import { signIn } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { LoginForm } from "./login-form";
+import { DEV_AUTH_ENABLED } from "@/lib/auth/dev-bypass";
 
 export const metadata = {
   title: "Sign in",
@@ -44,13 +44,25 @@ export default function LoginPage() {
               Sign in to your account to continue
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <LoginForm
               signInAction={async () => {
                 "use server";
                 await signIn("google", { redirectTo: "/dashboard" });
               }}
             />
+            {DEV_AUTH_ENABLED && (
+              <LoginForm
+                label="Dev Login (bypass)"
+                variant="outline"
+                signInAction={async () => {
+                  "use server";
+                  await signIn("dev-credentials", {
+                    redirectTo: "/dashboard",
+                  });
+                }}
+              />
+            )}
           </CardContent>
         </Card>
       </div>

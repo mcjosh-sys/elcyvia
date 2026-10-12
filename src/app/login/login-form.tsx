@@ -6,12 +6,20 @@ import { Loader2 } from "lucide-react";
 
 interface LoginFormProps {
   signInAction: () => Promise<void>;
+  label?: string;
+  variant?: "default" | "outline" | "secondary" | "ghost";
 }
 
-export function LoginForm({ signInAction }: LoginFormProps) {
+export function LoginForm({
+  signInAction,
+  label,
+  variant = "default",
+}: LoginFormProps) {
   const [, formAction, isPending] = useActionState(async () => {
     await signInAction();
   }, null);
+
+  const isGoogle = !label;
 
   return (
     <form action={formAction}>
@@ -19,14 +27,17 @@ export function LoginForm({ signInAction }: LoginFormProps) {
         type="submit"
         className="w-full"
         size="lg"
+        variant={variant}
         disabled={isPending}
       >
         {isPending ? (
           <Loader2 aria-hidden="true" className="mr-2 size-4 animate-spin" />
-        ) : (
+        ) : isGoogle ? (
           <GoogleIcon />
-        )}
-        {isPending ? "Signing in..." : "Continue with Google"}
+        ) : null}
+        {isPending
+          ? "Signing in..."
+          : label || "Continue with Google"}
       </Button>
     </form>
   );
