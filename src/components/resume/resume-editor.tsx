@@ -21,6 +21,9 @@ import {
   Check,
   Loader2,
   AlertCircle,
+  Eye,
+  EyeOff,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import type { ResumeContent, ResumeSection } from "@/types/resume";
@@ -31,6 +34,7 @@ import { EducationForm } from "./sections/education-form";
 import { SkillsForm } from "./sections/skills-form";
 import { ProjectsForm } from "./sections/projects-form";
 import { CertificationsForm } from "./sections/certifications-form";
+import { ResumePreview } from "./resume-preview";
 
 const SECTION_NAV = [
   { key: "personalInfo" as const, label: "Personal Info", icon: User },
@@ -63,6 +67,8 @@ export function ResumeEditor({
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState<ResumeContent>(initialContent);
   const [activeSection, setActiveSection] = useState<ResumeSection>("personalInfo");
+  const [showPreview, setShowPreview] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortController = useRef<AbortController | null>(null);
@@ -110,6 +116,26 @@ export function ResumeEditor({
     debouncedSave({ title: newTitle, content });
   }
 
+  async function handleExport() {
+    setIsExporting(true);
+    try {
+      const res = await fetch(`/api/resumes/${resumeId}/export`);
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title || "resume"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Resume exported");
+    } catch {
+      toast.error("Failed to export resume");
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   function handleContentChange(newContent: ResumeContent) {
     setContent(newContent);
     debouncedSave({ title, content: newContent });
@@ -145,6 +171,30 @@ export function ResumeEditor({
           <Badge variant="outline" className="capitalize text-xs">
             {initialStatus}
           </Badge>
+          <Separator orientation="vertical" className="h-4" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowPreview(!showPreview)}
+            className="hidden lg:flex text-xs gap-1.5"
+          >
+            {showPreview ? (
+              <EyeOff className="size-3.5" />
+            ) : (
+              <Eye className="size-3.5" />
+            )}
+            {showPreview ? "Hide preview" : "Preview"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="text-xs gap-1.5"
+          >
+            <Download className="size-3.5" />
+            {isExporting ? "Exporting..." : "Export PDF"}
+          </Button>
         </div>
       </header>
 
@@ -197,7 +247,7 @@ export function ResumeEditor({
         </div>
 
         {/* Form area */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className={cn("flex-1 overflow-y-auto p-6", showPreview && "lg:w-1/2")}>
           <div className="mx-auto max-w-2xl">
             {activeSection === "personalInfo" && (
               <PersonalInfoForm
@@ -245,6 +295,15 @@ export function ResumeEditor({
             )}
           </div>
         </div>
+
+        {/* Preview panel */}
+        {showPreview && (
+          <div className="hidden lg:block w-1/2 border-l bg-muted/30 overflow-y-auto p-6">
+            <div className="max-w-md mx-auto">
+              <ResumePreview content={content} templateId={initialTemplateId} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
