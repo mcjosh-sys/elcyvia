@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { eq, and, isNull, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -14,6 +15,7 @@ export const metadata = {
 };
 
 export default async function ResumesPage() {
+  await connection();
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 

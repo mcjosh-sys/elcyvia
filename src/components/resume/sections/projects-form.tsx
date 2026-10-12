@@ -84,9 +84,15 @@ export function ProjectsForm({ data, onChange }: ProjectsFormProps) {
       <div className="space-y-3">
         {data.map((entry, index) => (
           <Card key={entry.id}>
-            <button
+            <div
+              role="button"
+              tabIndex={0}
               onClick={() => toggleExpand(entry.id)}
-              className="flex w-full items-center justify-between p-4 text-left"
+              onKeyDown={(e) =>
+                (e.key === "Enter" || e.key === " ") &&
+                toggleExpand(entry.id)
+              }
+              className="flex w-full items-center justify-between p-4 text-left cursor-pointer"
             >
               <div className="min-w-0">
                 <div className="font-medium text-sm truncate">
@@ -135,7 +141,7 @@ export function ProjectsForm({ data, onChange }: ProjectsFormProps) {
                   <Trash2 className="size-3.5" />
                 </Button>
               </div>
-            </button>
+            </div>
 
             {expanded.has(entry.id) && (
               <CardContent className="border-t pt-4 space-y-4">

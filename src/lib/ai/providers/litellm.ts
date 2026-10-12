@@ -36,7 +36,7 @@ export class LiteLLMProvider implements AIProvider {
     const response = await this.client.chat.completions.create({
       model: this.model,
       messages,
-      temperature: params.temperature ?? 0.7,
+      temperature: params.temperature ?? 1,
       max_tokens: params.maxTokens,
     });
 
@@ -53,7 +53,7 @@ export class LiteLLMProvider implements AIProvider {
     const stream = await this.client.chat.completions.create({
       model: this.model,
       messages,
-      temperature: params.temperature ?? 0.7,
+      temperature: params.temperature ?? 1,
       max_tokens: params.maxTokens,
       stream: true,
     });

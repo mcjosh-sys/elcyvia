@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { eq, and, isNull } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -35,6 +36,7 @@ export default async function ResumeEditorPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await connection();
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
