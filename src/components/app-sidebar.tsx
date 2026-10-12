@@ -65,7 +65,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
     <Sidebar>
       <SidebarHeader>
         <div className="flex h-12 items-center px-4">
-          <Link href="/dashboard" className="text-lg font-bold tracking-tight">
+          <Link href="/dashboard" className="font-heading text-lg font-bold tracking-tight">
             Elcyvia
           </Link>
         </div>

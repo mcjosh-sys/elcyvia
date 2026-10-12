@@ -17,7 +17,7 @@ export default function Home() {
     <div className="flex min-h-[100dvh] flex-col">
       <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
         <nav className="flex h-14 w-full max-w-3xl items-center justify-between rounded-full border border-border/50 bg-background/80 px-6 shadow-sm backdrop-blur-xl">
-          <Link href="/" className="text-base font-semibold tracking-tight">
+          <Link href="/" className="font-heading text-base font-semibold tracking-tight">
             Elcyvia
           </Link>
           <div className="hidden items-center gap-6 md:flex">
@@ -38,7 +38,7 @@ export default function Home() {
             <Button variant="ghost" size="sm" render={<Link href="/login" />}>
               Sign in
             </Button>
-            <Button size="sm" render={<Link href="/login" />}>
+            <Button size="sm" render={<Link href="/login" />} className="rounded-full">
               Get started
               <ArrowRight
                 aria-hidden="true"
@@ -70,13 +70,15 @@ export default function Home() {
                   <Button
                     size="lg"
                     render={<Link href="/login" />}
-                    className="group/cta"
+                    className="group/cta rounded-full px-6"
                   >
                     Start for free
-                    <ArrowRight
-                      aria-hidden="true"
-                      className="ml-1 size-4 transition-transform group-hover/cta:translate-x-0.5"
-                    />
+                    <span className="ml-1.5 inline-flex size-6 items-center justify-center rounded-full bg-primary-foreground/15">
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="size-3.5 transition-transform group-hover/cta:translate-x-0.5"
+                      />
+                    </span>
                   </Button>
                 </div>
               </StaggerChild>

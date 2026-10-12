@@ -28,8 +28,8 @@ export function StaggerChild({
       return;
     }
 
-    el.style.animationDelay = `${index * 80}ms`;
-    el.classList.add("animate-fade-up");
+    el.style.animationDelay = `${index * 100}ms`;
+    el.classList.add("animate-fade-up-blur");
   }, [index]);
 
   return (

@@ -18,7 +18,7 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-[100dvh] lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between bg-primary p-12 text-primary-foreground">
-        <Link href="/" className="text-xl font-bold tracking-tight">
+        <Link href="/" className="font-heading text-xl font-bold tracking-tight">
           Elcyvia
         </Link>
         <div>
