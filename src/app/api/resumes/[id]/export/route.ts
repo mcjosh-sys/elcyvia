@@ -51,7 +51,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
       },
     });
   } catch (err) {
-    console.error("PDF export failed:", err);
+    console.error("PDF export failed:", err instanceof Error ? err.message : "Unknown error");
     return Response.json(
       { error: "Failed to generate PDF" },
       { status: 500 }

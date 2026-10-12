@@ -76,7 +76,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   const [updated] = await db
     .update(resumes)
     .set(updates)
-    .where(eq(resumes.id, id))
+    .where(and(eq(resumes.id, id), eq(resumes.userId, session.user.id)))
     .returning();
 
   return Response.json(updated);
@@ -99,7 +99,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   await db
     .update(resumes)
     .set({ deletedAt: new Date(), updatedAt: new Date() })
-    .where(eq(resumes.id, id));
+    .where(and(eq(resumes.id, id), eq(resumes.userId, session.user.id)));
 
   return new Response(null, { status: 204 });
 }

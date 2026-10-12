@@ -8,7 +8,7 @@ export default auth((req) => {
   const isOnLogin = pathname === "/login";
   const isProtectedApi = pathname.startsWith("/api/") &&
     !pathname.startsWith("/api/auth/") &&
-    !pathname.startsWith("/api/health") &&
+    pathname !== "/api/health" &&
     !pathname.startsWith("/api/webhooks/");
 
   if ((isOnDashboard || isOnSettings) && !isLoggedIn) {

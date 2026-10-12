@@ -62,7 +62,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   } catch (err) {
-    console.error("Section enhancement failed:", err);
+    console.error("Section enhancement failed:", err instanceof Error ? err.message : "Unknown error");
     return Response.json(
       { error: "AI enhancement failed. Please try again." },
       { status: 500 }

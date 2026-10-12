@@ -59,6 +59,14 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const data = new Uint8Array(arrayBuffer);
 
+    const header = new TextDecoder().decode(data.slice(0, 5));
+    if (header !== "%PDF-") {
+      return Response.json(
+        { error: "File does not appear to be a valid PDF" },
+        { status: 400 }
+      );
+    }
+
     const parser = new PDFParse({ data });
     const textResult = await parser.getText();
     const rawText = textResult.text;
@@ -98,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json(resume, { status: 201 });
   } catch (err) {
-    console.error("Resume upload/parse failed:", err);
+    console.error("Resume upload/parse failed:", err instanceof Error ? err.message : "Unknown error");
     return Response.json(
       { error: "Failed to parse resume. Please try again." },
       { status: 500 }

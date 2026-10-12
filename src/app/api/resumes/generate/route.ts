@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   } catch (err) {
-    console.error("Resume generation failed:", err);
+    console.error("Resume generation failed:", err instanceof Error ? err.message : "Unknown error");
     return Response.json(
       { error: "AI generation failed. Please try again." },
       { status: 500 }
