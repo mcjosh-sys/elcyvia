@@ -13,6 +13,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await connection();
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) return { title: "Resume" };
