@@ -19,6 +19,7 @@ import {
   Upload,
   ArrowRight,
   Check,
+  Loader2,
 } from "lucide-react";
 import { RESUME_TEMPLATES, type ResumeTemplate, type ResumeContent } from "@/types/resume";
 import { AIGenerateDialog } from "./ai-generate-dialog";
@@ -26,7 +27,16 @@ import { cn } from "cn";
 
 type CreationPath = "blank" | "ai" | "upload";
 
-const CREATION_PATHS = [
+interface CreationOption {
+  id: CreationPath;
+  title: string;
+  description: string;
+  icon: typeof FileText;
+  badge?: string;
+  disabled?: boolean;
+}
+
+const CREATION_PATHS: CreationOption[] = [
   {
     id: "blank" as const,
     title: "Start from scratch",
@@ -42,10 +52,8 @@ const CREATION_PATHS = [
   {
     id: "upload" as const,
     title: "Upload existing",
-    description: "Import and enhance an existing resume",
+    description: "Import and enhance an existing PDF resume",
     icon: Upload,
-    badge: "Coming soon",
-    disabled: true,
   },
 ];
 
@@ -56,6 +64,8 @@ export function NewResumeForm() {
   const [title, setTitle] = useState("");
   const [templateId, setTemplateId] = useState("professional");
   const [isCreating, setIsCreating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   async function createResume(content?: ResumeContent) {
     const resumeTitle = title.trim() || "Untitled Resume";
@@ -103,6 +113,40 @@ export function NewResumeForm() {
       setTitle(`${name}'s Resume`);
     }
     createResume(content);
+  }
+
+  async function handleUpload() {
+    if (!uploadFile) {
+      toast.error("Please select a PDF file");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", uploadFile);
+      formData.append("title", title.trim() || "Uploaded Resume");
+
+      const res = await fetch("/api/resumes/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Upload failed");
+      }
+
+      const resume = await res.json();
+      toast.success("Resume parsed and created");
+      router.push(`/dashboard/resumes/${resume.id}`);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to upload resume"
+      );
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   if (step === "path") {
@@ -156,6 +200,99 @@ export function NewResumeForm() {
           <Button onClick={() => setStep("details")} disabled={!path}>
             Continue
             <ArrowRight className="size-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (path === "upload") {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="upload-title">
+              Resume title{" "}
+              <span className="text-muted-foreground font-normal">
+                (optional)
+              </span>
+            </Label>
+            <Input
+              id="upload-title"
+              placeholder="e.g., My Resume"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Upload PDF</Label>
+            <div
+              className={cn(
+                "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+                uploadFile
+                  ? "border-primary bg-primary/5"
+                  : "border-muted-foreground/25 hover:border-muted-foreground/50"
+              )}
+            >
+              {uploadFile ? (
+                <div className="space-y-2">
+                  <FileText className="size-8 mx-auto text-primary" />
+                  <div className="text-sm font-medium">{uploadFile.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {(uploadFile.size / 1024).toFixed(1)} KB
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUploadFile(null)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <label className="cursor-pointer space-y-2 block">
+                  <Upload className="size-8 mx-auto text-muted-foreground" />
+                  <div className="text-sm text-muted-foreground">
+                    Click to upload or drag and drop
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    PDF files up to 5MB
+                  </div>
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setUploadFile(file);
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={() => setStep("path")}>
+            Back
+          </Button>
+          <Button
+            onClick={handleUpload}
+            disabled={isUploading || !uploadFile}
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Parsing resume...
+              </>
+            ) : (
+              <>
+                Upload and parse
+                <ArrowRight className="size-4" />
+              </>
+            )}
           </Button>
         </div>
       </div>
