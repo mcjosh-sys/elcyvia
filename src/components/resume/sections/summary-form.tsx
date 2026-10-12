@@ -2,20 +2,30 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { AIEnhanceButton } from "../ai-enhance-button";
 
 interface SummaryFormProps {
+  resumeId: string;
   data: string;
   onChange: (data: string) => void;
 }
 
-export function SummaryForm({ data, onChange }: SummaryFormProps) {
+export function SummaryForm({ resumeId, data, onChange }: SummaryFormProps) {
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">Professional Summary</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          A brief overview of your experience and career objectives.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Professional Summary</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            A brief overview of your experience and career objectives.
+          </p>
+        </div>
+        <AIEnhanceButton
+          resumeId={resumeId}
+          section="summary"
+          content={data}
+          onAccept={(enhanced) => onChange(enhanced as string)}
+        />
       </div>
 
       <div className="space-y-2">

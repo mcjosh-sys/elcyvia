@@ -20,7 +20,8 @@ import {
   ArrowRight,
   Check,
 } from "lucide-react";
-import { RESUME_TEMPLATES, type ResumeTemplate } from "@/types/resume";
+import { RESUME_TEMPLATES, type ResumeTemplate, type ResumeContent } from "@/types/resume";
+import { AIGenerateDialog } from "./ai-generate-dialog";
 import { cn } from "cn";
 
 type CreationPath = "blank" | "ai" | "upload";
@@ -37,15 +38,13 @@ const CREATION_PATHS = [
     title: "Generate with AI",
     description: "Let AI create a resume for your target role",
     icon: Sparkles,
-    badge: "Coming in Stage 3",
-    disabled: true,
   },
   {
     id: "upload" as const,
     title: "Upload existing",
     description: "Import and enhance an existing resume",
     icon: Upload,
-    badge: "Coming in Stage 5",
+    badge: "Coming soon",
     disabled: true,
   },
 ];
@@ -58,18 +57,19 @@ export function NewResumeForm() {
   const [templateId, setTemplateId] = useState("professional");
   const [isCreating, setIsCreating] = useState(false);
 
-  async function handleCreate() {
-    if (!title.trim()) {
-      toast.error("Please enter a resume title");
-      return;
-    }
+  async function createResume(content?: ResumeContent) {
+    const resumeTitle = title.trim() || "Untitled Resume";
 
     setIsCreating(true);
     try {
       const res = await fetch("/api/resumes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), templateId }),
+        body: JSON.stringify({
+          title: resumeTitle,
+          templateId,
+          content: content || undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -87,6 +87,22 @@ export function NewResumeForm() {
     } finally {
       setIsCreating(false);
     }
+  }
+
+  function handleCreate() {
+    if (!title.trim()) {
+      toast.error("Please enter a resume title");
+      return;
+    }
+    createResume();
+  }
+
+  function handleAIGenerated(content: ResumeContent) {
+    const name = content.personalInfo?.fullName;
+    if (!title.trim() && name) {
+      setTitle(`${name}'s Resume`);
+    }
+    createResume(content);
   }
 
   if (step === "path") {
@@ -141,6 +157,50 @@ export function NewResumeForm() {
             Continue
             <ArrowRight className="size-4" />
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (path === "ai") {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">
+              Resume title{" "}
+              <span className="text-muted-foreground font-normal">
+                (optional — auto-filled after generation)
+              </span>
+            </Label>
+            <Input
+              id="title"
+              placeholder="e.g., Software Engineer at Google"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Template</Label>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {RESUME_TEMPLATES.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  selected={templateId === template.id}
+                  onClick={() => setTemplateId(template.id)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={() => setStep("path")}>
+            Back
+          </Button>
+          <AIGenerateDialog onGenerated={handleAIGenerated} />
         </div>
       </div>
     );

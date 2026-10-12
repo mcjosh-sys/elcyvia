@@ -207,12 +207,14 @@ export function ResumeEditor({
             )}
             {activeSection === "summary" && (
               <SummaryForm
+                resumeId={resumeId}
                 data={content.summary || ""}
                 onChange={(data) => updateSection("summary", data)}
               />
             )}
             {activeSection === "experience" && (
               <ExperienceForm
+                resumeId={resumeId}
                 data={content.experience}
                 onChange={(data) => updateSection("experience", data)}
               />

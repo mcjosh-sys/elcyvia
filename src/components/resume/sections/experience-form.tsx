@@ -11,13 +11,15 @@ import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "cn";
 import { useState } from "react";
 import type { ExperienceEntry } from "@/types/resume";
+import { AIEnhanceButton } from "../ai-enhance-button";
 
 interface ExperienceFormProps {
+  resumeId: string;
   data: ExperienceEntry[];
   onChange: (data: ExperienceEntry[]) => void;
 }
 
-export function ExperienceForm({ data, onChange }: ExperienceFormProps) {
+export function ExperienceForm({ resumeId, data, onChange }: ExperienceFormProps) {
   const [expanded, setExpanded] = useState<Set<string>>(
     new Set(data.length > 0 ? [data[0].id] : [])
   );
@@ -67,11 +69,23 @@ export function ExperienceForm({ data, onChange }: ExperienceFormProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">Work Experience</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          List your relevant work experience, most recent first.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Work Experience</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            List your relevant work experience, most recent first.
+          </p>
+        </div>
+        {data.length > 0 && (
+          <AIEnhanceButton
+            resumeId={resumeId}
+            section="experience"
+            content={data}
+            onAccept={(enhanced) =>
+              onChange(enhanced as ExperienceEntry[])
+            }
+          />
+        )}
       </div>
 
       <div className="space-y-3">
