@@ -224,76 +224,79 @@ export function ResumeEditor({
           })}
         </nav>
 
-        {/* Mobile section tabs */}
-        <div className="md:hidden flex border-b overflow-x-auto px-2 shrink-0">
-          {SECTION_NAV.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.key;
-            return (
-              <button
-                key={section.key}
-                onClick={() => setActiveSection(section.key)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-2.5 text-xs whitespace-nowrap border-b-2 transition-colors shrink-0",
-                  isActive
-                    ? "border-primary text-primary font-medium"
-                    : "border-transparent text-muted-foreground"
-                )}
-              >
-                <Icon className="size-3.5" />
-                {section.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* Content area: mobile tabs + form stacked vertically */}
+        <div className={cn("flex flex-1 flex-col min-w-0 overflow-hidden", showPreview && "lg:w-1/2")}>
+          {/* Mobile section tabs */}
+          <div className="md:hidden flex border-b overflow-x-auto px-2 shrink-0">
+            {SECTION_NAV.map((section) => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.key;
+              return (
+                <button
+                  key={section.key}
+                  onClick={() => setActiveSection(section.key)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2.5 text-xs whitespace-nowrap border-b-2 transition-colors shrink-0",
+                    isActive
+                      ? "border-primary text-primary font-medium"
+                      : "border-transparent text-muted-foreground"
+                  )}
+                >
+                  <Icon className="size-3.5" />
+                  {section.label}
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Form area */}
-        <div className={cn("flex-1 overflow-y-auto p-6", showPreview && "lg:w-1/2")}>
-          <div className="mx-auto max-w-2xl">
-            {activeSection === "personalInfo" && (
-              <PersonalInfoForm
-                data={content.personalInfo}
-                onChange={(data) => updateSection("personalInfo", data)}
-              />
-            )}
-            {activeSection === "summary" && (
-              <SummaryForm
-                resumeId={resumeId}
-                data={content.summary || ""}
-                onChange={(data) => updateSection("summary", data)}
-              />
-            )}
-            {activeSection === "experience" && (
-              <ExperienceForm
-                resumeId={resumeId}
-                data={content.experience}
-                onChange={(data) => updateSection("experience", data)}
-              />
-            )}
-            {activeSection === "education" && (
-              <EducationForm
-                data={content.education}
-                onChange={(data) => updateSection("education", data)}
-              />
-            )}
-            {activeSection === "skills" && (
-              <SkillsForm
-                data={content.skills}
-                onChange={(data) => updateSection("skills", data)}
-              />
-            )}
-            {activeSection === "projects" && (
-              <ProjectsForm
-                data={content.projects}
-                onChange={(data) => updateSection("projects", data)}
-              />
-            )}
-            {activeSection === "certifications" && (
-              <CertificationsForm
-                data={content.certifications}
-                onChange={(data) => updateSection("certifications", data)}
-              />
-            )}
+          {/* Form area */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="mx-auto max-w-2xl">
+              {activeSection === "personalInfo" && (
+                <PersonalInfoForm
+                  data={content.personalInfo}
+                  onChange={(data) => updateSection("personalInfo", data)}
+                />
+              )}
+              {activeSection === "summary" && (
+                <SummaryForm
+                  resumeId={resumeId}
+                  data={content.summary || ""}
+                  onChange={(data) => updateSection("summary", data)}
+                />
+              )}
+              {activeSection === "experience" && (
+                <ExperienceForm
+                  resumeId={resumeId}
+                  data={content.experience}
+                  onChange={(data) => updateSection("experience", data)}
+                />
+              )}
+              {activeSection === "education" && (
+                <EducationForm
+                  data={content.education}
+                  onChange={(data) => updateSection("education", data)}
+                />
+              )}
+              {activeSection === "skills" && (
+                <SkillsForm
+                  data={content.skills}
+                  onChange={(data) => updateSection("skills", data)}
+                />
+              )}
+              {activeSection === "projects" && (
+                <ProjectsForm
+                  data={content.projects}
+                  onChange={(data) => updateSection("projects", data)}
+                />
+              )}
+              {activeSection === "certifications" && (
+                <CertificationsForm
+                  data={content.certifications}
+                  onChange={(data) => updateSection("certifications", data)}
+                />
+              )}
+            </div>
           </div>
         </div>
 
