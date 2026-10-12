@@ -5,12 +5,11 @@ import { db } from "@/lib/db";
 import { resumes } from "@/lib/db/schema";
 import { createResumeSchema } from "@/lib/validations";
 import { createEmptyResumeContent } from "@/types/resume";
+import { parseJSON, unauthorized } from "@/lib/api-utils";
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) return unauthorized();
 
   const userResumes = await db
     .select({
@@ -33,11 +32,11 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) return unauthorized();
 
-  const body = await request.json();
+  const [body, err] = await parseJSON(request);
+  if (err) return err;
+
   const parsed = createResumeSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(

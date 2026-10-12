@@ -66,6 +66,19 @@ export function NewResumeForm() {
   const [isCreating, setIsCreating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  function handleFileDrop(file: File) {
+    if (file.type !== "application/pdf") {
+      toast.error("Only PDF files are supported");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File must be under 5MB");
+      return;
+    }
+    setUploadFile(file);
+  }
 
   async function createResume(content?: ResumeContent) {
     const resumeTitle = title.trim() || "Untitled Resume";
@@ -159,12 +172,19 @@ export function NewResumeForm() {
             return (
               <Card
                 key={option.id}
+                tabIndex={option.disabled ? -1 : 0}
                 className={cn(
                   "cursor-pointer transition-all",
                   option.disabled && "opacity-50 cursor-not-allowed",
+                  !option.disabled && "focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                   selected && !option.disabled && "ring-2 ring-primary"
                 )}
                 onClick={() => !option.disabled && setPath(option.id)}
+                onKeyDown={(e) =>
+                  !option.disabled &&
+                  (e.key === "Enter" || e.key === " ") &&
+                  (e.preventDefault(), setPath(option.id))
+                }
               >
                 <CardHeader className="flex flex-row items-center gap-4 pb-2">
                   <div
@@ -232,8 +252,21 @@ export function NewResumeForm() {
                 "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
                 uploadFile
                   ? "border-primary bg-primary/5"
-                  : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                  : isDragging
+                    ? "border-primary bg-primary/5"
+                    : "border-muted-foreground/25 hover:border-muted-foreground/50"
               )}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files[0];
+                if (file) handleFileDrop(file);
+              }}
             >
               {uploadFile ? (
                 <div className="space-y-2">
@@ -265,7 +298,7 @@ export function NewResumeForm() {
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) setUploadFile(file);
+                      if (file) handleFileDrop(file);
                     }}
                   />
                 </label>
@@ -377,8 +410,17 @@ export function NewResumeForm() {
           Back
         </Button>
         <Button onClick={handleCreate} disabled={isCreating || !title.trim()}>
-          {isCreating ? "Creating..." : "Create resume"}
-          {!isCreating && <ArrowRight className="size-4" />}
+          {isCreating ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            <>
+              Create resume
+              <ArrowRight className="size-4" />
+            </>
+          )}
         </Button>
       </div>
     </div>

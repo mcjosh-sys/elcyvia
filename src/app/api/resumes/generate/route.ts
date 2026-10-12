@@ -6,14 +6,15 @@ import {
   RESUME_GENERATION_SYSTEM,
   buildGenerationPrompt,
 } from "@/lib/ai/prompts";
+import { parseJSON, unauthorized } from "@/lib/api-utils";
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) return unauthorized();
 
-  const body = await request.json();
+  const [body, err] = await parseJSON(request);
+  if (err) return err;
+
   const parsed = generateResumeSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
@@ -32,15 +33,12 @@ export async function POST(request: NextRequest) {
     const stream = await provider.streamText({
       systemPrompt: RESUME_GENERATION_SYSTEM,
       prompt: buildGenerationPrompt(jobTitle, jobDescription, personalInfo),
-      temperature: 0.7,
+      temperature: 1,
       maxTokens: 4000,
     });
 
     return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Transfer-Encoding": "chunked",
-      },
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   } catch (err) {
     console.error("Resume generation failed:", err);

@@ -4,16 +4,22 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { resumes } from "@/lib/db/schema";
 import { updateResumeSchema } from "@/lib/validations";
+import {
+  isValidUUID,
+  parseJSON,
+  invalidId,
+  unauthorized,
+  notFound,
+} from "@/lib/api-utils";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: Params) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) return unauthorized();
 
   const { id } = await params;
+  if (!isValidUUID(id)) return invalidId();
 
   const [resume] = await db
     .select()
@@ -26,21 +32,21 @@ export async function GET(_request: NextRequest, { params }: Params) {
       )
     );
 
-  if (!resume) {
-    return Response.json({ error: "Resume not found" }, { status: 404 });
-  }
+  if (!resume) return notFound();
 
   return Response.json(resume);
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) return unauthorized();
 
   const { id } = await params;
-  const body = await request.json();
+  if (!isValidUUID(id)) return invalidId();
+
+  const [body, err] = await parseJSON(request);
+  if (err) return err;
+
   const parsed = updateResumeSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
@@ -54,16 +60,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     .from(resumes)
     .where(and(eq(resumes.id, id), isNull(resumes.deletedAt)));
 
-  if (!existing || existing.userId !== session.user.id) {
-    return Response.json({ error: "Resume not found" }, { status: 404 });
-  }
+  if (!existing || existing.userId !== session.user.id) return notFound();
 
-  const updates: Record<string, unknown> = { updatedAt: new Date() };
-  if (parsed.data.title !== undefined) updates.title = parsed.data.title;
-  if (parsed.data.content !== undefined) updates.content = parsed.data.content;
-  if (parsed.data.templateId !== undefined)
-    updates.templateId = parsed.data.templateId;
-  if (parsed.data.status !== undefined) updates.status = parsed.data.status;
+  const { title, content, templateId, status } = parsed.data;
+  const updates = Object.fromEntries(
+    Object.entries({
+      title,
+      content,
+      templateId,
+      status,
+      updatedAt: new Date(),
+    }).filter(([, v]) => v !== undefined)
+  );
 
   const [updated] = await db
     .update(resumes)
@@ -76,25 +84,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) return unauthorized();
 
   const { id } = await params;
+  if (!isValidUUID(id)) return invalidId();
 
   const [existing] = await db
     .select({ userId: resumes.userId })
     .from(resumes)
     .where(and(eq(resumes.id, id), isNull(resumes.deletedAt)));
 
-  if (!existing || existing.userId !== session.user.id) {
-    return Response.json({ error: "Resume not found" }, { status: 404 });
-  }
+  if (!existing || existing.userId !== session.user.id) return notFound();
 
   await db
     .update(resumes)
     .set({ deletedAt: new Date(), updatedAt: new Date() })
     .where(eq(resumes.id, id));
 
-  return Response.json({ success: true });
+  return new Response(null, { status: 204 });
 }

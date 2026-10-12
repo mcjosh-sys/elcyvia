@@ -5,20 +5,35 @@ import { db } from "@/lib/db";
 import { resumes } from "@/lib/db/schema";
 import { getDefaultProvider, getProvider } from "@/lib/ai";
 import { RESUME_PARSE_SYSTEM, buildParsePrompt } from "@/lib/ai/prompts";
+import { uploadResumeSchema } from "@/lib/validations";
 import type { ResumeContent } from "@/types/resume";
+import { unauthorized } from "@/lib/api-utils";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return unauthorized();
+
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return Response.json({ error: "Invalid form data" }, { status: 400 });
   }
 
-  const formData = await request.formData();
   const file = formData.get("file") as File | null;
-  const providerId = formData.get("providerId") as string | null;
-  const title = (formData.get("title") as string) || "Uploaded Resume";
+  const parsed = uploadResumeSchema.safeParse({
+    title: formData.get("title"),
+    providerId: formData.get("providerId"),
+  });
+
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
 
   if (!file) {
     return Response.json({ error: "No file provided" }, { status: 400 });
@@ -38,6 +53,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const { title, providerId } = parsed.data;
+
   try {
     const arrayBuffer = await file.arrayBuffer();
     const data = new Uint8Array(arrayBuffer);
@@ -49,7 +66,10 @@ export async function POST(request: NextRequest) {
 
     if (!rawText.trim()) {
       return Response.json(
-        { error: "Could not extract text from PDF. The file may be scanned or image-based." },
+        {
+          error:
+            "Could not extract text from PDF. The file may be scanned or image-based.",
+        },
         { status: 400 }
       );
     }
@@ -61,7 +81,7 @@ export async function POST(request: NextRequest) {
     const content = await provider.generateJSON<ResumeContent>({
       systemPrompt: RESUME_PARSE_SYSTEM,
       prompt: buildParsePrompt(rawText.slice(0, 10000)),
-      temperature: 0.2,
+      temperature: 1,
       maxTokens: 4000,
       parse: (text) => JSON.parse(text),
     });
@@ -70,7 +90,7 @@ export async function POST(request: NextRequest) {
       .insert(resumes)
       .values({
         userId: session.user.id,
-        title,
+        title: title || "Uploaded Resume",
         content: content as unknown as Record<string, unknown>,
         templateId: "professional",
       })

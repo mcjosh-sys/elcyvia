@@ -87,7 +87,8 @@ export function SkillsForm({ data, onChange }: SkillsFormProps) {
                       {skill}
                       <button
                         onClick={() => removeSkill(group.id, skill)}
-                        className="ml-0.5 hover:text-destructive transition-colors"
+                        aria-label={`Remove ${skill}`}
+                        className="ml-0.5 p-0.5 hover:text-destructive transition-colors"
                       >
                         <X className="size-3" />
                       </button>
@@ -95,6 +96,9 @@ export function SkillsForm({ data, onChange }: SkillsFormProps) {
                   ))}
                 </div>
                 <SkillInput onAdd={(skill) => addSkill(group.id, skill)} />
+                <p className="text-xs text-muted-foreground">
+                  Press Enter or comma to add a skill
+                </p>
               </div>
             </CardContent>
           </Card>

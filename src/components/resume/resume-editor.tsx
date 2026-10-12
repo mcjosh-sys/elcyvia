@@ -157,6 +157,7 @@ export function ResumeEditor({
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Link
           href="/dashboard/resumes"
+          aria-label="Back to resumes"
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="size-4" />
@@ -314,7 +315,7 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
       {status === "saved" && (
         <>
-          <Check className="size-3.5 text-emerald-500" />
+          <Check className="size-3.5 text-primary" />
           <span>Saved</span>
         </>
       )}

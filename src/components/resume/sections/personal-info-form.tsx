@@ -31,6 +31,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
             value={data.fullName}
             onChange={(e) => update("fullName", e.target.value)}
             placeholder="John Doe"
+            autoComplete="name"
           />
         </div>
 
@@ -42,6 +43,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
             value={data.email}
             onChange={(e) => update("email", e.target.value)}
             placeholder="john@example.com"
+            autoComplete="email"
           />
         </div>
 
@@ -53,6 +55,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
             value={data.phone || ""}
             onChange={(e) => update("phone", e.target.value)}
             placeholder="+1 (555) 000-0000"
+            autoComplete="tel"
           />
         </div>
 
@@ -70,9 +73,11 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           <Label htmlFor="linkedin">LinkedIn</Label>
           <Input
             id="linkedin"
+            type="url"
             value={data.linkedin || ""}
             onChange={(e) => update("linkedin", e.target.value)}
             placeholder="https://linkedin.com/in/johndoe"
+            autoComplete="url"
           />
         </div>
 
@@ -80,9 +85,11 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           <Label htmlFor="website">Website / Portfolio</Label>
           <Input
             id="website"
+            type="url"
             value={data.website || ""}
             onChange={(e) => update("website", e.target.value)}
             placeholder="https://johndoe.com"
+            autoComplete="url"
           />
         </div>
       </div>

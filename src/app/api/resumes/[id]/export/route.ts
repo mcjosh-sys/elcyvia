@@ -7,19 +7,24 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { ResumePDFDocument } from "@/lib/resume-templates/pdf-document";
 import type { ResumeContent } from "@/types/resume";
 import { createEmptyResumeContent } from "@/types/resume";
+import { isValidUUID, invalidId, unauthorized, notFound } from "@/lib/api-utils";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: Params) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) return unauthorized();
 
   const { id } = await params;
+  if (!isValidUUID(id)) return invalidId();
 
   const [resume] = await db
-    .select()
+    .select({
+      title: resumes.title,
+      content: resumes.content,
+      templateId: resumes.templateId,
+      userId: resumes.userId,
+    })
     .from(resumes)
     .where(
       and(
@@ -29,9 +34,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
       )
     );
 
-  if (!resume) {
-    return Response.json({ error: "Resume not found" }, { status: 404 });
-  }
+  if (!resume) return notFound();
 
   const content =
     (resume.content as unknown as ResumeContent) || createEmptyResumeContent();
@@ -39,11 +42,12 @@ export async function GET(_request: NextRequest, { params }: Params) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buffer = await renderToBuffer(ResumePDFDocument({ content }) as any);
+    const safeTitle = resume.title.replace(/[^\w\s.-]/g, "");
 
     return new Response(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${encodeURIComponent(resume.title)}.pdf"`,
+        "Content-Disposition": `attachment; filename="${encodeURIComponent(safeTitle)}.pdf"`,
       },
     });
   } catch (err) {

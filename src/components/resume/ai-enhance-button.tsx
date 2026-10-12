@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +20,32 @@ interface AIEnhanceButtonProps {
   section: string;
   content: unknown;
   onAccept: (enhanced: unknown) => void;
+}
+
+function formatEnhancedContent(data: unknown): string {
+  if (typeof data === "string") return data;
+  if (Array.isArray(data)) {
+    return data
+      .map((item) => {
+        if (typeof item === "object" && item !== null) {
+          const lines: string[] = [];
+          for (const [key, val] of Object.entries(item)) {
+            if (key === "id" || val === undefined || val === null) continue;
+            if (typeof val === "boolean") {
+              if (val) lines.push(`${key}: Yes`);
+            } else if (Array.isArray(val)) {
+              lines.push(`${key}: ${val.join(", ")}`);
+            } else {
+              lines.push(`${key}: ${val}`);
+            }
+          }
+          return lines.join("\n");
+        }
+        return String(item);
+      })
+      .join("\n\n---\n\n");
+  }
+  return JSON.stringify(data, null, 2);
 }
 
 export function AIEnhanceButton({
@@ -70,7 +97,9 @@ export function AIEnhanceButton({
       setEnhanced(parsed);
       setShowReview(true);
     } catch (err) {
-      console.error("Enhancement failed:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Enhancement failed. Please try again."
+      );
     } finally {
       setIsEnhancing(false);
       setShowInstructionInput(false);
@@ -100,8 +129,8 @@ export function AIEnhanceButton({
               value={instruction}
               onChange={(e) => setInstruction(e.target.value)}
               placeholder="e.g., Make it more concise, add metrics..."
-              rows={1}
-              className="resize-none text-sm flex-1"
+              rows={2}
+              className="text-sm flex-1"
             />
             <Button
               size="sm"
@@ -129,9 +158,7 @@ export function AIEnhanceButton({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() =>
-              isEnhancing ? undefined : setShowInstructionInput(true)
-            }
+            onClick={() => setShowInstructionInput(true)}
             disabled={isEnhancing}
             className="text-xs gap-1.5"
           >
@@ -155,17 +182,18 @@ export function AIEnhanceButton({
           <DialogHeader>
             <DialogTitle>AI Enhancement</DialogTitle>
             <DialogDescription>
-              Review the enhanced content. Accept to apply or reject to keep
-              the original.
+              Review the enhanced content below. Accept to apply the changes.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
             <div>
-              <Label className="text-xs text-muted-foreground">Enhanced version</Label>
-              <pre className="mt-1 rounded-lg bg-muted p-3 text-sm whitespace-pre-wrap max-h-60 overflow-y-auto">
-                {JSON.stringify(enhanced, null, 2)}
-              </pre>
+              <Label className="text-xs text-muted-foreground">
+                Enhanced version
+              </Label>
+              <div className="mt-1 rounded-lg bg-muted p-3 text-sm whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed">
+                {formatEnhancedContent(enhanced)}
+              </div>
             </div>
           </div>
 

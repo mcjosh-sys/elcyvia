@@ -119,7 +119,7 @@ export function ResumeList({ resumes }: { resumes: Resume[] }) {
         {resumes.map((resume) => {
           const statusStyle = STATUS_STYLES[resume.status];
           return (
-            <Card key={resume.id} className="group relative">
+            <Card key={resume.id} className="group relative hover:shadow-md hover:border-primary/20 transition-all">
               <CardHeader className="flex flex-row items-start justify-between gap-2 pb-3">
                 <div className="flex-1 min-w-0">
                   <Link href={`/dashboard/resumes/${resume.id}`}>
@@ -134,7 +134,7 @@ export function ResumeList({ resumes }: { resumes: Resume[] }) {
                       <Button
                         variant="ghost"
                         size="icon-xs"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                        className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity shrink-0"
                       />
                     }
                   >

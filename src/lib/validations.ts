@@ -63,16 +63,22 @@ export const resumeContentSchema = z.object({
   certifications: z.array(certificationEntrySchema),
 });
 
+const templateIdSchema = z
+  .enum(["professional", "modern", "minimal"])
+  .optional();
+
+const providerIdSchema = z.enum(["litellm", "gemini"]).optional();
+
 export const createResumeSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
-  templateId: z.string().optional(),
+  templateId: templateIdSchema,
   content: resumeContentSchema.optional(),
 });
 
 export const updateResumeSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   content: resumeContentSchema.optional(),
-  templateId: z.string().optional(),
+  templateId: templateIdSchema,
   status: z.enum(["draft", "complete", "archived"]).optional(),
 });
 
@@ -80,14 +86,19 @@ export const generateResumeSchema = z.object({
   jobTitle: z.string().min(1, "Job title is required").max(200),
   jobDescription: z.string().max(10000).optional(),
   personalInfo: personalInfoSchema.optional(),
-  providerId: z.string().optional(),
+  providerId: providerIdSchema,
 });
 
 export const enhanceSectionSchema = z.object({
-  section: z.string().min(1),
-  content: z.unknown(),
+  section: z.string().min(1).max(100),
+  content: z.union([z.string(), z.array(z.record(z.string(), z.unknown()))]),
   instruction: z.string().max(1000).optional(),
-  providerId: z.string().optional(),
+  providerId: providerIdSchema,
+});
+
+export const uploadResumeSchema = z.object({
+  title: z.string().max(200).optional(),
+  providerId: providerIdSchema,
 });
 
 export const createInterviewSchema = z.object({
