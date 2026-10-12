@@ -3,7 +3,8 @@
 import { nanoid } from "nanoid";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { AITextarea } from "../ai-textarea";
+import { BulletGenerator } from "../bullet-generator";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -220,15 +221,27 @@ export function ExperienceForm({ resumeId, data, onChange }: ExperienceFormProps
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
+                  <div className="flex items-center justify-between">
+                    <Label>Description</Label>
+                    <BulletGenerator
+                      resumeId={resumeId}
+                      role={entry.title}
+                      company={entry.company}
+                      description={entry.description}
+                      onApply={(bullets) =>
+                        updateEntry(entry.id, { description: bullets })
+                      }
+                    />
+                  </div>
+                  <AITextarea
                     value={entry.description}
-                    onChange={(e) =>
-                      updateEntry(entry.id, { description: e.target.value })
+                    onChange={(value) =>
+                      updateEntry(entry.id, { description: value })
                     }
+                    fieldType="experience description"
+                    context={`Role: ${entry.title} at ${entry.company}`}
                     placeholder="Describe your responsibilities and achievements..."
                     rows={4}
-                    className="resize-none"
                   />
                 </div>
               </CardContent>

@@ -3,7 +3,7 @@
 import { nanoid } from "nanoid";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { AITextarea } from "../ai-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -169,14 +169,15 @@ export function ProjectsForm({ data, onChange }: ProjectsFormProps) {
                 </div>
                 <div className="space-y-2">
                   <Label>Description</Label>
-                  <Textarea
+                  <AITextarea
                     value={entry.description}
-                    onChange={(e) =>
-                      updateEntry(entry.id, { description: e.target.value })
+                    onChange={(value) =>
+                      updateEntry(entry.id, { description: value })
                     }
+                    fieldType="project description"
+                    context={`Project: ${entry.name}`}
                     placeholder="What does this project do? What was your role?"
                     rows={3}
-                    className="resize-none"
                   />
                 </div>
                 <div className="space-y-2">

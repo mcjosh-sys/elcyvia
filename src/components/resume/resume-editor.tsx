@@ -26,6 +26,7 @@ import {
   Download,
 } from "lucide-react";
 import Link from "next/link";
+import { BarChart3 } from "lucide-react";
 import type { ResumeContent, ResumeSection } from "@/types/resume";
 import { PersonalInfoForm } from "./sections/personal-info-form";
 import { SummaryForm } from "./sections/summary-form";
@@ -35,6 +36,9 @@ import { SkillsForm } from "./sections/skills-form";
 import { ProjectsForm } from "./sections/projects-form";
 import { CertificationsForm } from "./sections/certifications-form";
 import { ResumePreview } from "./resume-preview";
+import { TailorDialog } from "./tailor-dialog";
+import { AnalysisPanel } from "./analysis-panel";
+import { CoverLetterDialog } from "./cover-letter-dialog";
 
 const SECTION_NAV = [
   { key: "personalInfo" as const, label: "Personal Info", icon: User },
@@ -68,6 +72,7 @@ export function ResumeEditor({
   const [content, setContent] = useState<ResumeContent>(initialContent);
   const [activeSection, setActiveSection] = useState<ResumeSection>("personalInfo");
   const [showPreview, setShowPreview] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -173,10 +178,32 @@ export function ResumeEditor({
             {initialStatus}
           </Badge>
           <Separator orientation="vertical" className="h-4" />
+          <TailorDialog
+            resumeId={resumeId}
+            currentContent={content}
+            onApply={(tailored) => handleContentChange(tailored)}
+          />
+          <Button
+            variant={showAnalysis ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setShowAnalysis(!showAnalysis);
+              if (!showAnalysis) setShowPreview(false);
+            }}
+            className="text-xs gap-1.5"
+          >
+            <BarChart3 className="size-3.5" />
+            ATS Score
+          </Button>
+          <CoverLetterDialog resumeId={resumeId} />
+          <Separator orientation="vertical" className="h-4 hidden lg:block" />
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowPreview(!showPreview)}
+            onClick={() => {
+              setShowPreview(!showPreview);
+              if (!showPreview) setShowAnalysis(false);
+            }}
             className="hidden lg:flex text-xs gap-1.5"
           >
             {showPreview ? (
@@ -301,11 +328,25 @@ export function ResumeEditor({
         </div>
 
         {/* Preview panel */}
-        {showPreview && (
+        {showPreview && !showAnalysis && (
           <div className="hidden lg:block w-1/2 border-l bg-muted/30 overflow-y-auto p-6">
             <div className="max-w-md mx-auto">
               <ResumePreview content={content} templateId={initialTemplateId} />
             </div>
+          </div>
+        )}
+
+        {/* Analysis panel */}
+        {showAnalysis && (
+          <div className="w-80 lg:w-96 border-l bg-background shrink-0 overflow-hidden">
+            <AnalysisPanel
+              resumeId={resumeId}
+              onNavigateSection={(section) => {
+                setActiveSection(section);
+                setShowAnalysis(false);
+              }}
+              onClose={() => setShowAnalysis(false)}
+            />
           </div>
         )}
       </div>

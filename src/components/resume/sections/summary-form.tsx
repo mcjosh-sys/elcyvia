@@ -1,8 +1,8 @@
 "use client";
 
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AIEnhanceButton } from "../ai-enhance-button";
+import { AITextarea } from "../ai-textarea";
 
 interface SummaryFormProps {
   resumeId: string;
@@ -30,13 +30,13 @@ export function SummaryForm({ resumeId, data, onChange }: SummaryFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="summary">Summary</Label>
-        <Textarea
+        <AITextarea
           id="summary"
           value={data}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
+          fieldType="professional summary"
           placeholder="Experienced software engineer with 5+ years of expertise in building scalable web applications..."
           rows={6}
-          className="resize-none"
         />
         <p className="text-xs text-muted-foreground">
           {data.length} / 3000 characters
